@@ -44,6 +44,8 @@ const appRouter = (app) => {
     // products
     Router.post('/create-new-product', appController.createNewProduct);
     Router.get('/get-all-product-limit', appController.getAllProductLimit);
+    Router.put('/update-product', appController.updateProduct);
+    Router.put('/delete-or-restore-product', appController.deleteOrRestoreProduct);
 
     // upload image
     Router.post('/upload-image-product', upload.single('image'), appController.UploadImageProduct);

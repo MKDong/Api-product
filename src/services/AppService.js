@@ -400,7 +400,11 @@ class AppService {
                     });
                 }
 
-                const count = await db.Product.count();
+                const count = await db.Product.count({
+                    where: {
+                        isDeleted: idQuery ? 'delete' : 'not-delete',
+                    },
+                });
 
                 if (+countQuery >= +count) {
                     isValidNextPage = false;
@@ -418,6 +422,77 @@ class AppService {
                 });
             } catch (error) {
                 console.log(error);
+                reject(error);
+            }
+        });
+    }
+
+    async updateProduct(data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!data.id || !data.image || !data.name || !data.price || !data.category || !data.description) {
+                    return resolve({
+                        errCode: 1,
+                        msg: 'missing required parameters',
+                    });
+                }
+
+                await db.Product.update(
+                    {
+                        name: data.name,
+                        price: data.price,
+                        sale: data.sale,
+                        amount: data.amount,
+                        category: data.category,
+                        description: data.description,
+                        image: data.image,
+                        unixTask: data.unixTask,
+                        rate: data.rate,
+                    },
+                    {
+                        where: {
+                            id: data.id,
+                        },
+                    },
+                );
+
+                resolve({
+                    errCode: 0,
+                    msg: 'product successfully updated',
+                    data: data,
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async deleteOrRestoreProduct(data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!data.type || !data.id) {
+                    return resolve({
+                        errCode: 1,
+                        msg: 'missing required parameters',
+                    });
+                }
+
+                await db.Product.update(
+                    {
+                        isDeleted: data?.type === 'restore' ? 'not-deleted' : 'delete',
+                    },
+                    {
+                        where: {
+                            id: data.id,
+                        },
+                    },
+                );
+
+                resolve({
+                    errCode: 0,
+                    msg: 'success',
+                });
+            } catch (error) {
                 reject(error);
             }
         });

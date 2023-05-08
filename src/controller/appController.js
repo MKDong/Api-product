@@ -173,6 +173,34 @@ class AppController {
             });
         }
     }
+
+    async updateProduct(req, res) {
+        try {
+            const data = await AppService.updateProduct(req.body);
+
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(200).json({
+                errCode: -1,
+                msg: `${JSON.stringify(error)}`,
+            });
+        }
+    }
+
+    async deleteOrRestoreProduct(req, res) {
+        try {
+            const data = await AppService.deleteOrRestoreProduct(req.body);
+
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(200).json({
+                errCode: -1,
+                msg: `${JSON.stringify(error)}`,
+            });
+        }
+    }
 }
 
 module.exports = new AppController();
