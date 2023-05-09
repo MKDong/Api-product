@@ -40,15 +40,18 @@ const appRouter = (app) => {
 
     // categories
     Router.get('/get-all-categories', appController.GetAllCateGories);
+    Router.post('/create-new-cate', appController.CreateNewCateGories);
+    Router.put('/update-categories', appController.updateCateGories);
+    Router.delete('/delete-categories-by-id/:id', appController.deleteCateGoriesById);
 
     // products
-    Router.post('/create-new-product', appController.createNewProduct);
+    Router.post('/create-new-product', upload.single('image'), appController.createNewProduct);
     Router.get('/get-all-product-limit', appController.getAllProductLimit);
     Router.put('/update-product', appController.updateProduct);
     Router.put('/delete-or-restore-product', appController.deleteOrRestoreProduct);
 
     // upload image
-    Router.post('/upload-image-product', upload.single('image'), appController.UploadImageProduct);
+    Router.post('/upload-image', upload.single('image'), appController.UploadImageProduct);
 
     app.use('/api/app/v1', Router);
 };

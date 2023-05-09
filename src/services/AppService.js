@@ -291,10 +291,28 @@ class AppService {
         });
     }
 
-    async GetAllCateGories() {
+    async GetAllCateGories(type = 'no-product') {
         return new Promise(async (resolve, reject) => {
             try {
-                const data = await db.Categories.findAll();
+                let data;
+
+                if (type === 'no-product') {
+                    data = await db.Categories.findAll();
+                }
+
+                if (type === 'product') {
+                    data = await db.Categories.findAll({
+                        include: [
+                            {
+                                model: db.Product,
+                                as: 'ProData',
+                                where: {
+                                    isDeleted: 'not-delete',
+                                },
+                            },
+                        ],
+                    });
+                }
 
                 resolve({
                     errCode: 0,
@@ -334,10 +352,10 @@ class AppService {
         });
     }
 
-    async createNewProduct(data) {
+    async createNewProduct(data, file) {
         return new Promise(async (resolve, reject) => {
             try {
-                if (!data.image || !data.name || !data.price || !data.category || !data.description) {
+                if (!data.name || !data.price || !data.category || !data.description || !file) {
                     return resolve({
                         errCode: 1,
                         msg: 'missing required parameters',
@@ -345,7 +363,7 @@ class AppService {
                 }
 
                 const dataRes = await db.Product.create({
-                    image: data.image,
+                    image: file?.filename,
                     name: data.name,
                     price: data.price,
                     category: data.category,
@@ -355,7 +373,7 @@ class AppService {
                 resolve({
                     errCode: 0,
                     msg: 'ok',
-                    dataRes,
+                    dataRes: dataRes,
                 });
 
                 resolve({
@@ -369,7 +387,7 @@ class AppService {
         });
     }
 
-    async getAllProductLimit(page, limit, idQuery) {
+    async getAllProductLimit(page, limit, idQuery = 'not-delete') {
         return new Promise(async (resolve, reject) => {
             try {
                 if (!page) {
@@ -389,8 +407,9 @@ class AppService {
                     offset,
                     limit: +limit,
                     where: {
-                        isDeleted: idQuery ? 'delete' : 'not-delete',
+                        isDeleted: idQuery,
                     },
+                    include: [{ model: db.Categories, as: 'CateData' }],
                 });
 
                 if (!data) {
@@ -402,7 +421,7 @@ class AppService {
 
                 const count = await db.Product.count({
                     where: {
-                        isDeleted: idQuery ? 'delete' : 'not-delete',
+                        isDeleted: idQuery,
                     },
                 });
 
@@ -491,6 +510,89 @@ class AppService {
                 resolve({
                     errCode: 0,
                     msg: 'success',
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async CreateNewCateGories(data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!data.name) {
+                    return resolve({
+                        errCode: 1,
+                        msg: 'Missing name',
+                    });
+                }
+
+                await db.Categories.create({
+                    name: data.name,
+                });
+
+                return resolve({
+                    errCode: 0,
+                    msg: 'create successfully new category',
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async updateCateGories(data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!data.name || !data.name) {
+                    return resolve({
+                        errCode: 1,
+                        msg: 'missing required parameters',
+                    });
+                }
+
+                const ResCate = await db.Categories.update(
+                    {
+                        name: data.name,
+                    },
+                    {
+                        where: {
+                            id: data.id,
+                        },
+                    },
+                );
+
+                resolve({
+                    errCode: 0,
+                    msg: 'Update successfully category',
+                    data: ResCate,
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async deleteCateGoriesById(id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!id) {
+                    return resolve({
+                        errCode: 1,
+                        msg: 'missing required parameters',
+                    });
+                }
+
+                const ResCate = await db.Categories.destroy({
+                    where: {
+                        id: id,
+                    },
+                });
+
+                resolve({
+                    errCode: 0,
+                    msg: 'delete successfully category',
+                    data: ResCate,
                 });
             } catch (error) {
                 reject(error);

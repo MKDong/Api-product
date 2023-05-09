@@ -9,6 +9,7 @@ const userRouter = require('./routes/userRoter');
 const appRouter = require('./routes/appRouter');
 const configPublic = require('./config/configPublic');
 const port = process.env.PORT || 8080;
+
 // using morgan
 app.use(morgan('combined'));
 
